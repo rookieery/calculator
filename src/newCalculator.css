@@ -1,0 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.calculator {
+  width: 400px;
+  height: 100%;
+  background-color: rgb(241, 241, 241);
+  overflow: hidden;
+  margin: 0 auto;
+  border-top-left-radius: 10%;
+  border-top-right-radius: 10%;
+  box-sizing: border-box;
+}
+.smallScreen {
+  height: 50px;
+  line-height: 50px;
+  margin-top: 50px;
+  font-size: 20px;
+  color: yellowgreen;
+}
+.bigScreen {
+  height: 100px;
+  font-size: 50px;
+  line-height: 100px;
+  color: #000;
+  font-weight: 600;
+}
+span {
+  float: right;
+}
+.button{
+  width: 100px;
+  height: 80px;
+  line-height: 80px;
+  float: left;
+  text-align: center;
+  border: 2px solid rgb(241, 241, 241);
+}
+.operationButton {
+  font-size: 20px;
+  background-color: rgb(245, 245, 245);
+}
+.numberButton{
+  font-size: 25px;
+  font-weight: 700;
+  background-color: rgb(255, 255, 255);
+}
+.equalButton {
+  background-color: rgb(112, 176, 228);
+}

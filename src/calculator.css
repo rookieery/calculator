@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 .calculator {
@@ -34,7 +35,6 @@ span {
 .M {
     margin-top: 20px;
     height: 30px;
-    /* 另外一丢丢高度被吃掉了？ */
 }
 
 .M li {
@@ -68,12 +68,11 @@ transition: all 0.5s;
 .row li {
     width: 100px;
     height: 80px;
-    line-height: 70px;
+    line-height: 80px;
     list-style: none;
     float: left;
     text-align: center;
     border: 2px solid rgb(241, 241, 241);
-    box-sizing: border-box;
 }
 
 .u1 {
