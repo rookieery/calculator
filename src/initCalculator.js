@@ -5,33 +5,24 @@ import OperationButton from './operationButton.js';
 import EqualButton from './equalButton.js';
 
 export default class InitCalculator {
-  constructor() {
-    this._numberButton = new NumberButton();
-    this._operationButton = new OperationButton();
-    this._equalButton = new EqualButton();
-  }
-
-  createCalculator() {
+  static createCalculator() {
     const body = document.getElementsByTagName('body')[0];
     const calculator = document.createElement('div');
-    const operationClassName = this._operationButton.className;
-    const numberClassName = this._numberButton.className;
-    const equalClassName = this._equalButton.className;
     calculator.classList.add('calculator');
     calculator.appendChild(InitCalculator.createScreen('smallScreen', ''));
     calculator.appendChild(InitCalculator.createScreen('bigScreen', 0));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [operationClassName, '%'], [operationClassName, 'CE'], [operationClassName, 'C'], [operationClassName, 'DEL']]));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [operationClassName, '1/x'], [operationClassName, 'x^2'], [operationClassName, 'sqrX'], [operationClassName, '/']]));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [numberClassName, '7'], [numberClassName, '8'], [numberClassName, '9'], [operationClassName, '*']]));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [numberClassName, '4'], [numberClassName, '5'], [numberClassName, '6'], [operationClassName, '-']]));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [numberClassName, '1'], [numberClassName, '2'], [numberClassName, '3'], [operationClassName, '+']]));
-    calculator.appendChild(InitCalculator.createRowDiv([
-      [numberClassName, '+/_'], [numberClassName, '0'], [numberClassName, '.'], [equalClassName, '=']]));
+    calculator.appendChild(InitCalculator.createRowDiv([new OperationButton('div', '%', '%').createButton(), new OperationButton('div', 'CE', 'CE').createButton(),
+      new OperationButton('div', 'C', 'C').createButton(), new OperationButton('div', 'DEL', 'DEL').createButton()]));
+    calculator.appendChild(InitCalculator.createRowDiv([new OperationButton('div', '1/x', '1/x').createButton(), new OperationButton('div', 'x^2', 'x^2').createButton(),
+      new OperationButton('div', 'sqrX', 'sqrX').createButton(), new OperationButton('div', '/', '/').createButton()]));
+    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '7', '7').createButton(), new NumberButton('div', '8', '8').createButton(),
+      new NumberButton('div', '9', '9').createButton(), new OperationButton('div', '*', '*').createButton()]));
+    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '4', '4').createButton(), new NumberButton('div', '5', '5').createButton(),
+      new NumberButton('div', '6', '6').createButton(), new OperationButton('div', '-', '-').createButton()]));
+    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '1', '1').createButton(), new NumberButton('div', '2', '2').createButton(),
+      new NumberButton('div', '3', '3').createButton(), new OperationButton('div', '+', '+').createButton()]));
+    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '+/_', '+/_').createButton(), new NumberButton('div', '0', '0').createButton(),
+      new NumberButton('div', '.', '.').createButton(), new EqualButton('div', '=', '=').createButton()]));
     body.appendChild(calculator);
   }
 
@@ -48,16 +39,10 @@ export default class InitCalculator {
     return span;
   }
 
-  static createRowDiv(classNames) {
+  static createRowDiv(buttons) {
     const rowDiv = document.createElement('div');
-    for (let i = 0; i < classNames.length; i++) {
-      const className = classNames[i][0];
-      const text = classNames[i][1];
-      const button = document.createElement('div');
-      button.classList.add('button');
-      button.classList.add(className);
-      button.innerText = text;
-      rowDiv.appendChild(button);
+    for (let i = 0; i < buttons.length; i++) {
+      rowDiv.appendChild(buttons[i]);
     }
     return rowDiv;
   }

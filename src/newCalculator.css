@@ -38,6 +38,7 @@ span {
   float: left;
   text-align: center;
   border: 2px solid rgb(241, 241, 241);
+  transition: all 0.5s;
 }
 .operationButton {
   font-size: 20px;
@@ -48,6 +49,12 @@ span {
   font-weight: 700;
   background-color: rgb(255, 255, 255);
 }
+.operationButton:hover,.numberButton:hover{
+  background-color: rgb(214, 212, 212);
+}
 .equalButton {
   background-color: rgb(112, 176, 228);
+}
+.equalButton:hover{
+  background-color: rgb(19, 109, 182);
 }

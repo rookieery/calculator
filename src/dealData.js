@@ -1,13 +1,17 @@
 export default class DealData {
-  static dealOperation(e) {
+  constructor() {
+    this._data = '';
+  }
+
+  dealOperation(e) {
     console.log(e.target.innerText);
   }
 
-  static dealNumber(e) {
+  dealNumber(e) {
     console.log(e.target.innerText);
   }
 
-  static dealEqual(e) {
+  dealEqual(e) {
     console.log(e.target.innerText);
   }
 }
