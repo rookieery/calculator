@@ -17,6 +17,7 @@
   "rules": {
     "no-underscore-dangle": "off",
     "linebreak-style": ["error", "windows"],
-     "no-plusplus": "off"
+     "no-plusplus": "off",
+     "import/extensions": "off"
   }
 }

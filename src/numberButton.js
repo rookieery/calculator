@@ -1,9 +1,12 @@
-import { Button } from './button.js'
-export class NumberButton extends Button {
+
+import Button from './button.js';
+
+export default class NumberButton extends Button {
   constructor() {
     super();
-    this._className = super._className + ' ' + 'numberButton';
+    this._className = 'numberButton';
   }
+
   get className() {
     return this._className;
   }
