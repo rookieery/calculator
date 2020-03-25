@@ -11,17 +11,17 @@ export default class InitCalculator {
     calculator.classList.add('calculator');
     calculator.appendChild(InitCalculator.createScreen('smallScreen', ''));
     calculator.appendChild(InitCalculator.createScreen('bigScreen', 0));
-    calculator.appendChild(InitCalculator.createRowDiv([new OperationButton('div', '%', '%').createButton(), new OperationButton('div', 'CE', 'CE').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new OperationButton('div', '%', '%').createButton(), new OperationButton('div', 'CE', 'CE').createButton(),
       new OperationButton('div', 'C', 'C').createButton(), new OperationButton('div', 'DEL', 'DEL').createButton()]));
-    calculator.appendChild(InitCalculator.createRowDiv([new OperationButton('div', '1/x', '1/x').createButton(), new OperationButton('div', 'x^2', 'x^2').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new OperationButton('div', '1/x', '1/x').createButton(), new OperationButton('div', 'x^2', 'x^2').createButton(),
       new OperationButton('div', 'sqrX', 'sqrX').createButton(), new OperationButton('div', '/', '/').createButton()]));
-    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '7', '7').createButton(), new NumberButton('div', '8', '8').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new NumberButton('div', '7', '7').createButton(), new NumberButton('div', '8', '8').createButton(),
       new NumberButton('div', '9', '9').createButton(), new OperationButton('div', '*', '*').createButton()]));
-    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '4', '4').createButton(), new NumberButton('div', '5', '5').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new NumberButton('div', '4', '4').createButton(), new NumberButton('div', '5', '5').createButton(),
       new NumberButton('div', '6', '6').createButton(), new OperationButton('div', '-', '-').createButton()]));
-    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '1', '1').createButton(), new NumberButton('div', '2', '2').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new NumberButton('div', '1', '1').createButton(), new NumberButton('div', '2', '2').createButton(),
       new NumberButton('div', '3', '3').createButton(), new OperationButton('div', '+', '+').createButton()]));
-    calculator.appendChild(InitCalculator.createRowDiv([new NumberButton('div', '+/_', '+/_').createButton(), new NumberButton('div', '0', '0').createButton(),
+    calculator.appendChild(InitCalculator.appendButtons([new NumberButton('div', '+/_', '+/_').createButton(), new NumberButton('div', '0', '0').createButton(),
       new NumberButton('div', '.', '.').createButton(), new EqualButton('div', '=', '=').createButton()]));
     body.appendChild(calculator);
   }
@@ -39,7 +39,7 @@ export default class InitCalculator {
     return span;
   }
 
-  static createRowDiv(buttons) {
+  static appendButtons(buttons) {
     const rowDiv = document.createElement('div');
     for (let i = 0; i < buttons.length; i++) {
       rowDiv.appendChild(buttons[i]);
