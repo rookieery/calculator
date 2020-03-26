@@ -1,19 +1,17 @@
 import Button from './button.js';
 
-import DealData from './dealData.js';
-
 export default class EqualButton extends Button {
-  constructor(type, id, text) {
-    super(type, id, text);
-    this._dealData = new DealData();
+  constructor(text, dealData) {
+    super(text);
     this._className = `${super.className} equalButton`;
+    this._dealData = dealData;
   }
 
   get className() {
     return this._className;
   }
 
-  clickHandler(e) {
-    this._dealData.dealEqual(e);
+  clickHandler() {
+    this._dealData.dealEqual();
   }
 }

@@ -1,11 +1,10 @@
 import Button from './button.js';
 
-import DealData from './dealData.js';
-
 export default class OperationButton extends Button {
-  constructor(type, id, text) {
-    super(type, id, text);
-    this._dealData = new DealData();
+  constructor(text, dealData) {
+    super(text);
+    this._text = text;
+    this._dealData = dealData;
     this._className = `${super.className} operationButton`;
   }
 
@@ -13,7 +12,7 @@ export default class OperationButton extends Button {
     return this._className;
   }
 
-  clickHandler(e) {
-    this._dealData.dealOperation(e);
+  clickHandler(text) {
+    this._dealData.dealOperation(text);
   }
 }

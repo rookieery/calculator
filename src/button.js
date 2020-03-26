@@ -1,10 +1,8 @@
 
 export default class Button {
-  constructor(type, id, text) {
+  constructor(text) {
     this._className = 'button';
-    this._id = id;
     this._text = text;
-    this._type = type;
   }
 
   get className() {
@@ -15,14 +13,6 @@ export default class Button {
     this._className = value;
   }
 
-  get id() {
-    return this._id;
-  }
-
-  set id(value) {
-    this._id = value;
-  }
-
   get text() {
     return this._text;
   }
@@ -31,17 +21,8 @@ export default class Button {
     this._text = value;
   }
 
-  get type() {
-    return this._type;
-  }
-
-  set type(value) {
-    this._type = value;
-  }
-
   createButton() {
-    const button = document.createElement(this._type);
-    button.id = this._id;
+    const button = document.createElement('div');
     button.className = this._className;
     button.innerText = this._text;
     this.addClickEvent(button);
@@ -49,9 +30,9 @@ export default class Button {
   }
 
   addClickEvent(button) {
-    // 箭头函数保证this指向
-    button.addEventListener('click', (e) => {
-      this.clickHandler(e);
+    // Arrow function guarantees that this points to
+    button.addEventListener('click', () => {
+      this.clickHandler(this._text);
     }, false);
   }
 }

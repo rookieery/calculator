@@ -19,7 +19,8 @@
   line-height: 50px;
   margin-top: 50px;
   font-size: 20px;
-  color: yellowgreen;
+  color: rgb(95, 95, 95);
+  text-align: right;
 }
 .bigScreen {
   height: 100px;
@@ -27,9 +28,7 @@
   line-height: 100px;
   color: #000;
   font-weight: 600;
-}
-span {
-  float: right;
+  text-align: right;
 }
 .button{
   width: 100px;
