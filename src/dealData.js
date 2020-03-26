@@ -4,7 +4,7 @@ import DisplayData from './displayData.js';
 import screenTexts from './screenTextSign.js';
 
 let _data = '0';
-let _previousData = '';
+let _previousData = '0';
 let _previousSign = '';
 let _text = '';
 let _previousText = '';
@@ -16,6 +16,13 @@ const _displayData = new DisplayData();
 function dealImmediateOperation(text) {
   switch (text) {
     case screenTexts.percentSign:
+      if (_text === '' || _text === '0') {
+        _data = '0';
+        _text = '0';
+      } else {
+        _data = (Number(_data) / 100).toString();
+        _text += _data;
+      }
       break;
     case screenTexts.rootSquare:
       _text += `rSqr(${_data})`;
@@ -52,7 +59,7 @@ function deal(numOne, sign, numTwo) {
 }
 function dealC() {
   _data = '0';
-  _previousData = '';
+  _previousData = '0';
   _previousSign = '';
   _text = '';
   _previousText = '';
@@ -74,6 +81,7 @@ function dealCE() {
     _displayData.showSmallScreen(_text);
   }
   _data = '0';
+  _previousData = '0';
   _displayData.showBigScreen('0');
 }
 
@@ -101,9 +109,10 @@ function dealPreviousSign(text) {
   } else {
     const splitTexts = _text.split(_previousSign);
     _data = deal(splitTexts[0], _previousSign, _data).toString();
-    _text += _previousSign;
+    _text += text;
     _continuousOperation = true;
   }
+  _previousData = _data;
 }
 
 export function dealOperation(text) {
@@ -165,6 +174,9 @@ export function dealNumber(text) {
   if (text === screenTexts.decimalPoint) {
     if (!_data.includes('.')) {
       _data += '.';
+      if (_text === '') {
+        _previousData = _data;
+      }
       _continuousNumber = true;
     }
     _displayData.showBigScreen(_data);
@@ -175,14 +187,17 @@ export function dealNumber(text) {
       return;
     }
     _data = _data[0] === '-' ? _data.substring(1) : `-${_data}`;
+    if (_text === '') {
+      _previousData = _data;
+    }
     _continuousNumber = true;
     _displayData.showBigScreen(_data);
     return;
   }
-  if (_continuousOperation) {
+  _data = _continuousNumber ? _data + text : text;
+  if (_text === '') {
     _previousData = _data;
   }
-  _data = _continuousNumber ? _data + text : text;
   _continuousNumber = true;
   _displayData.showBigScreen(_data);
   _previousOperation = 'number';
@@ -198,18 +213,10 @@ export function dealEqual() {
     _displayData.showBigScreen(_data);
     return;
   }
-  let splitTexts = [];
-  const dataSign = _data[0];
-  if (dataSign === '-' && _previousSign === '-') {
-    splitTexts = _text.substring(1).split(_previousSign);
-    splitTexts[0] = `-${splitTexts[0]}`;
-  } else {
-    splitTexts = _text.split(_previousSign);
-  }
   _text += `${_data}=`;
-  _previousData = _data;
-  _data = deal(splitTexts[0], _previousSign, _data).toString();
+  _data = deal(_previousData, _previousSign, _data).toString();
   _displayData.showSmallScreen(_text);
   _continuousOperation = false;
   _displayData.showBigScreen(_data);
+  _previousData = _data;
 }
