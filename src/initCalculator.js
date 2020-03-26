@@ -5,36 +5,33 @@ import OperationButton from './operationButton.js';
 
 import EqualButton from './equalButton.js';
 
-import DealData from './dealData.js';
-
 import screenTexts from './screenTextSign.js';
 
 export default class InitCalculator {
   static createCalculator() {
     const body = document.getElementsByTagName('body')[0];
     const calculator = document.createElement('div');
-    const dealData = new DealData();
     calculator.classList.add('calculator');
     calculator.appendChild(InitCalculator.createScreen('smallScreen', ''));
     calculator.appendChild(InitCalculator.createScreen('bigScreen', 0));
     calculator.appendChild(InitCalculator.appendButtons([
-      new OperationButton(screenTexts.percentSign, dealData).createButton(), new OperationButton(screenTexts.clearCurrentOperation, dealData).createButton(),
-      new OperationButton(screenTexts.clearAllOperation, dealData).createButton(), new OperationButton(screenTexts.deleteNumber, dealData).createButton()]));
+      new OperationButton(screenTexts.percentSign).createButton(), new OperationButton(screenTexts.clearCurrentOperation).createButton(),
+      new OperationButton(screenTexts.clearAllOperation).createButton(), new OperationButton(screenTexts.deleteNumber).createButton()]));
     calculator.appendChild(InitCalculator.appendButtons([
-      new OperationButton(screenTexts.reciprocal, dealData).createButton(), new OperationButton(screenTexts.square, dealData).createButton(),
-      new OperationButton(screenTexts.rootSquare, dealData).createButton(), new OperationButton(screenTexts.division, dealData).createButton()]));
+      new OperationButton(screenTexts.reciprocal).createButton(), new OperationButton(screenTexts.square).createButton(),
+      new OperationButton(screenTexts.rootSquare).createButton(), new OperationButton(screenTexts.division).createButton()]));
     calculator.appendChild(InitCalculator.appendButtons([
-      new NumberButton(screenTexts.seven, dealData).createButton(), new NumberButton(screenTexts.eight, dealData).createButton(),
-      new NumberButton(screenTexts.nine, dealData).createButton(), new OperationButton(screenTexts.multiplication, dealData).createButton()]));
+      new NumberButton(screenTexts.seven).createButton(), new NumberButton(screenTexts.eight).createButton(),
+      new NumberButton(screenTexts.nine).createButton(), new OperationButton(screenTexts.multiplication).createButton()]));
     calculator.appendChild(InitCalculator.appendButtons([
-      new NumberButton(screenTexts.four, dealData).createButton(), new NumberButton(screenTexts.five, dealData).createButton(),
-      new NumberButton(screenTexts.six, dealData).createButton(), new OperationButton(screenTexts.subtraction, dealData).createButton()]));
+      new NumberButton(screenTexts.four).createButton(), new NumberButton(screenTexts.five).createButton(),
+      new NumberButton(screenTexts.six).createButton(), new OperationButton(screenTexts.subtraction).createButton()]));
     calculator.appendChild(InitCalculator.appendButtons([
-      new NumberButton(screenTexts.one, dealData).createButton(), new NumberButton(screenTexts.two, dealData).createButton(),
-      new NumberButton(screenTexts.three, dealData).createButton(), new OperationButton(screenTexts.addition, dealData).createButton()]));
+      new NumberButton(screenTexts.one).createButton(), new NumberButton(screenTexts.two).createButton(),
+      new NumberButton(screenTexts.three).createButton(), new OperationButton(screenTexts.addition).createButton()]));
     calculator.appendChild(InitCalculator.appendButtons([
-      new NumberButton(screenTexts.sign, dealData).createButton(), new NumberButton(screenTexts.zero, dealData).createButton(),
-      new NumberButton(screenTexts.decimalPoint, dealData).createButton(), new EqualButton(screenTexts.equal, dealData).createButton()]));
+      new NumberButton(screenTexts.sign).createButton(), new NumberButton(screenTexts.zero).createButton(),
+      new NumberButton(screenTexts.decimalPoint).createButton(), new EqualButton(screenTexts.equal).createButton()]));
     body.appendChild(calculator);
   }
 

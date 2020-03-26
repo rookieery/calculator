@@ -1,10 +1,11 @@
 import Button from './button.js';
 
+import { dealEqual } from './dealData.js';
+
 export default class EqualButton extends Button {
-  constructor(text, dealData) {
+  constructor(text) {
     super(text);
     this._className = `${super.className} equalButton`;
-    this._dealData = dealData;
   }
 
   get className() {
@@ -12,6 +13,6 @@ export default class EqualButton extends Button {
   }
 
   clickHandler() {
-    this._dealData.dealEqual();
+    dealEqual(this._text);
   }
 }

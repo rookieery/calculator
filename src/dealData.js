@@ -1,149 +1,215 @@
+/* eslint-disable max-len */
 import DisplayData from './displayData.js';
 
 import screenTexts from './screenTextSign.js';
 
-export default class DealData {
-  constructor() {
-    this._data = '';
-    this._templeData = '';
-    this._dataSign = '';
-    this._templeSign = '';
-    this._text = '';
-    this._continuousNumber = true;
-    this._continuousOperation = false;
-    this._displayData = new DisplayData();
+let _data = '0';
+let _previousData = '';
+let _previousSign = '';
+let _text = '';
+let _previousText = '';
+let _previousOperation = '';
+let _continuousNumber = false;
+let _continuousOperation = false;
+let _OnceOperation = false;
+const _displayData = new DisplayData();
+function dealImmediateOperation(text) {
+  switch (text) {
+    case screenTexts.percentSign:
+      break;
+    case screenTexts.rootSquare:
+      _text += `rSqr(${_data})`;
+      _data = (Number(_data) ** 0.5).toString();
+      break;
+    case screenTexts.square:
+      _text += `sqr(${_data})`;
+      _data = (Number(_data) ** 2).toString();
+      break;
+    case screenTexts.reciprocal:
+      _text += `1/(${_data})`;
+      _data = (1 / Number(_data)).toString();
+      break;
+    default:
+      break;
   }
+  _displayData.showBigScreen(_data);
+  _displayData.showSmallScreen(_text);
+}
 
-  dealOperation(text) {
-    if (text === screenTexts.clearAllOperation) {
-      this.dealC();
-      return;
-    }
-    if (text === screenTexts.deleteNumber) {
-      this.dealDelete();
-      return;
-    }
-    if (text === screenTexts.percentSign || text === screenTexts.rootSquare || text === screenTexts.square || text === screenTexts.reciprocal) {
-      this.dealImmediateOperation(text);
-      return;
-    }
-    this._text += this._data;
-    this._continuousNumber = false;
-    if (this._templeSign !== '') {
-      this.dealTempleSign(text);
-      this._displayData.showBigScreen(this._data);
-      this._displayData.showSmallScreen(this._text);
-      this._templeSign = text;
-      return;
-    }
-    this._templeSign = text;
-    if (text === screenTexts.addition || text === screenTexts.subtraction || text === screenTexts.multiplication || text === screenTexts.division) {
-      this._text += text;
-      this._displayData.showSmallScreen(`${this._text}`);
-    }
+function deal(numOne, sign, numTwo) {
+  switch (sign) {
+    case screenTexts.addition:
+      return Number(numOne) + Number(numTwo);
+    case screenTexts.subtraction:
+      return Number(numOne) - Number(numTwo);
+    case screenTexts.multiplication:
+      return Number(numOne) * Number(numTwo);
+    case screenTexts.division:
+      return Number(numOne) / Number(numTwo);
+    default:
+      return null;
   }
+}
+function dealC() {
+  _data = '0';
+  _previousData = '';
+  _previousSign = '';
+  _text = '';
+  _previousText = '';
+  _previousOperation = '';
+  _continuousOperation = false;
+  _continuousNumber = false;
+  _OnceOperation = false;
+  _displayData.showSmallScreen('');
+  _displayData.showBigScreen('0');
+}
 
-  dealNumber(text) {
-    if (text === screenTexts.sign) {
-      if (this._dataSign === '-') {
-        this._dataSign = '+';
-        this._data = this._data.substring(1);
-      } else {
-        this._dataSign = '-';
-        this._data = `-${this._data}`;
-      }
-      this._displayData.showBigScreen(this._data);
-      return;
-    }
-    if (this._continuousOperation) {
-      this._templeData = this._data;
-    }
-    this._data = this._continuousNumber ? this._data + text : text;
-    this._continuousNumber = true;
-    this._displayData.showBigScreen(this._data);
+function dealCE() {
+  if (_text.includes('=')) {
+    dealC();
+    return;
   }
+  if (_OnceOperation) {
+    _text = _previousText;
+    _displayData.showSmallScreen(_text);
+  }
+  _data = '0';
+  _displayData.showBigScreen('0');
+}
 
-  dealEqual() {
-    if (this._dataSign === '+' && this._templeSign === '-') {
-
+function dealDelete() {
+  if (_continuousNumber) {
+    _data = _data.substring(0, _data.length - 1);
+    if (parseFloat(_data).toString() === 'NaN') {
+      _displayData.showBigScreen('0');
     } else {
-      const splitTexts = this._text.split(this._templeSign);
-      this._data = DealData.deal(splitTexts[0], this._templeSign, splitTexts[1]).toString();
-      this._displayData.showSmallScreen(`${this._text}=`);
-      this._text = this._data;
+      _displayData.showBigScreen(_data);
     }
-    this._continuousOperation = false;
-    this._displayData.showBigScreen(this._data);
+  } else {
+    _data = '0';
+    _previousSign = '';
+    _text = '';
+    _continuousOperation = false;
+    _displayData.showSmallScreen('');
   }
+}
 
-  dealC() {
-    this._data = '';
-    this._dataSign = '';
-    this._templeSign = '';
-    this._text = '';
-    this._continuousOperation = false;
-    this._continuousNumber = true;
-    this._displayData.showSmallScreen('');
-    this._displayData.showBigScreen('0');
+function dealPreviousSign(text) {
+  if (_continuousOperation) {
+    _text += text;
+    _data = deal(_previousData, _previousSign, _data).toString();
+  } else {
+    const splitTexts = _text.split(_previousSign);
+    _data = deal(splitTexts[0], _previousSign, _data).toString();
+    _text += _previousSign;
+    _continuousOperation = true;
   }
+}
 
-  dealDelete() {
-    // two case todo
-    this._data = this._data.substring(0, this._data.length - 1);
-    if (Number.isNaN(this._data)) {
-      this._displayData.showBigScreen('0');
-    } else {
-      this._displayData.showBigScreen(this._data);
+export function dealOperation(text) {
+  if (text === screenTexts.clearAllOperation) {
+    dealC();
+    return;
+  }
+  if (text === screenTexts.clearCurrentOperation) {
+    dealCE();
+    return;
+  }
+  _OnceOperation = false;
+  if (text === screenTexts.deleteNumber) {
+    dealDelete();
+    return;
+  }
+  _continuousNumber = false;
+  if (text === screenTexts.percentSign || text === screenTexts.rootSquare || text === screenTexts.square || text === screenTexts.reciprocal) {
+    _previousText = _text;
+    _OnceOperation = true;
+    dealImmediateOperation(text);
+    return;
+  }
+  // operation switch
+  if (_previousOperation === 'operation') {
+    _previousSign = text;
+    _text = _text.substring(0, _text.length - 1) + text;
+    _displayData.showSmallScreen(_text);
+    return;
+  }
+  if (_text.includes('=')) {
+    _text = _data;
+    _previousSign = '';
+  } else {
+    _text += _data;
+  }
+  // continuous operation
+  if (_previousSign !== '') {
+    dealPreviousSign(text);
+    _displayData.showBigScreen(_data);
+    _displayData.showSmallScreen(_text);
+    _previousSign = text;
+    _previousOperation = 'operation';
+    return;
+  }
+  _previousSign = text;
+  if (text === screenTexts.addition || text === screenTexts.subtraction || text === screenTexts.multiplication || text === screenTexts.division) {
+    _text += text;
+    _displayData.showSmallScreen(_text);
+    _previousOperation = 'operation';
+  }
+}
+
+export function dealNumber(text) {
+  _OnceOperation = false;
+  if (text === screenTexts.zero && _data === '0') {
+    return;
+  }
+  if (text === screenTexts.decimalPoint) {
+    if (!_data.includes('.')) {
+      _data += '.';
+      _continuousNumber = true;
     }
+    _displayData.showBigScreen(_data);
+    return;
   }
-
-  dealTempleSign(text) {
-    if (this._continuousOperation) {
-      this._text += text;
-      this._data = DealData.deal(this._templeData, this._templeSign, this._data).toString();
-    } else {
-      const splitTexts = this._text.split(this._templeSign);
-      this._data = DealData.deal(splitTexts[0], this._templeSign, this._data).toString();
-      this._text += this._templeSign;
-      this._continuousOperation = true;
+  if (text === screenTexts.sign) {
+    if (_data === '0') {
+      return;
     }
+    _data = _data[0] === '-' ? _data.substring(1) : `-${_data}`;
+    _continuousNumber = true;
+    _displayData.showBigScreen(_data);
+    return;
   }
+  if (_continuousOperation) {
+    _previousData = _data;
+  }
+  _data = _continuousNumber ? _data + text : text;
+  _continuousNumber = true;
+  _displayData.showBigScreen(_data);
+  _previousOperation = 'number';
+}
 
-  dealImmediateOperation(text) {
-    switch (text) {
-      case screenTexts.percentSign:
-        break;
-      case screenTexts.rootSquare:
-        this._text += `rSqr(${this._data})`;
-        this._data = (Number(this._data) ** 0.5).toString();
-        break;
-      case screenTexts.square:
-        this._text += `sqr(${this._data})`;
-        this._data = (Number(this._data) ** 2).toString();
-        break;
-      case screenTexts.reciprocal:
-        this._text += `1/(${this._data})`;
-        this._data = (1 / Number(this._data)).toString();
-        break;
-      default:
-        break;
-    }
-    this._displayData.showBigScreen(this._data);
-    this._displayData.showSmallScreen(this._text);
+export function dealEqual() {
+  _OnceOperation = false;
+  _continuousNumber = false;
+  if (_text.includes('=')) {
+    _text = `${_data + _previousSign + _previousData}=`;
+    _data = deal(_data, _previousSign, _previousData).toString();
+    _displayData.showSmallScreen(_text);
+    _displayData.showBigScreen(_data);
+    return;
   }
-
-  static deal(numOne, sign, numTwo) {
-    switch (sign) {
-      case screenTexts.addition:
-        return Number(numOne) + Number(numTwo);
-      case screenTexts.subtraction:
-        return Number(numOne) - Number(numTwo);
-      case screenTexts.multiplication:
-        return Number(numOne) * Number(numTwo);
-      case screenTexts.division:
-        return Number(numOne) / Number(numTwo);
-      default:
-        return null;
-    }
+  let splitTexts = [];
+  const dataSign = _data[0];
+  if (dataSign === '-' && _previousSign === '-') {
+    splitTexts = _text.substring(1).split(_previousSign);
+    splitTexts[0] = `-${splitTexts[0]}`;
+  } else {
+    splitTexts = _text.split(_previousSign);
   }
+  _text += `${_data}=`;
+  _previousData = _data;
+  _data = deal(splitTexts[0], _previousSign, _data).toString();
+  _displayData.showSmallScreen(_text);
+  _continuousOperation = false;
+  _displayData.showBigScreen(_data);
 }

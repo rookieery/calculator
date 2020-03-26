@@ -1,5 +1,7 @@
 import Button from './button.js';
 
+import { dealOperation } from './dealData.js';
+
 export default class OperationButton extends Button {
   constructor(text, dealData) {
     super(text);
@@ -12,7 +14,7 @@ export default class OperationButton extends Button {
     return this._className;
   }
 
-  clickHandler(text) {
-    this._dealData.dealOperation(text);
+  clickHandler() {
+    dealOperation(this._text);
   }
 }

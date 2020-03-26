@@ -32,7 +32,7 @@ export default class Button {
   addClickEvent(button) {
     // Arrow function guarantees that this points to
     button.addEventListener('click', () => {
-      this.clickHandler(this._text);
+      this.clickHandler();
     }, false);
   }
 }

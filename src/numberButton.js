@@ -1,5 +1,7 @@
 import Button from './button.js';
 
+import { dealNumber } from './dealData.js';
+
 export default class NumberButton extends Button {
   constructor(text, dealData) {
     super(text);
@@ -11,7 +13,7 @@ export default class NumberButton extends Button {
     return this._className;
   }
 
-  clickHandler(text) {
-    this._dealData.dealNumber(text);
+  clickHandler() {
+    dealNumber(this._text);
   }
 }
