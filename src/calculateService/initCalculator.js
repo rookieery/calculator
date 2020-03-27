@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import NumberButton from './numberButton.js';
+import NumberButton from '../buttons/numberButton.js';
 
-import OperationButton from './operationButton.js';
+import OperationButton from '../buttons/operationButton.js';
 
-import EqualButton from './equalButton.js';
+import EqualButton from '../buttons/equalButton.js';
 
 import screenTexts from './screenTextSign.js';
 

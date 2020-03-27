@@ -1,6 +1,6 @@
 import Button from './button.js';
 
-import { dealEqual } from './dealData.js';
+import { dealEqual } from '../calculateService/dealData.js';
 
 export default class EqualButton extends Button {
   constructor(text) {

@@ -1,4 +1,4 @@
-import InitCalculator from './initCalculator.js';
+import InitCalculator from './calculateService/initCalculator.js';
 
 class Main {
   static start() {

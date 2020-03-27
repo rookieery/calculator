@@ -1,8 +1,9 @@
 /* eslint-disable max-len */
-import DisplayData from './displayData.js';
+import DisplayData from '../views/displayData.js';
 
 import screenTexts from './screenTextSign.js';
 
+// The content displayed on the screen should be screenTextSign
 let _data = '0';
 let _previousData = '0';
 let _previousSign = '';

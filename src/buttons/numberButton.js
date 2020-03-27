@@ -1,6 +1,6 @@
 import Button from './button.js';
 
-import { dealNumber } from './dealData.js';
+import { dealNumber } from '../calculateService/dealData.js';
 
 export default class NumberButton extends Button {
   constructor(text, dealData) {
