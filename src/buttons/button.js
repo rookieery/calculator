@@ -31,8 +31,9 @@ export default class Button {
 
   addClickEvent(button) {
     // Arrow function guarantees that this points to
-    button.addEventListener('click', () => {
-      this.clickHandler();
-    }, false);
+    button.addEventListener('click', this.clickHandler, false);
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  clickHandler() { }
 }
