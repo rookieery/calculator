@@ -14,7 +14,7 @@ let smallLastScreenData = ''; // 小屏幕最后一个数据（小屏幕）（�
 let equalPreviousData = ''; // =前的操作数（小屏幕）(四则运算激活时才会改变)(连等的时候使用)
 let isHaveDecimalPoint = false; // 大屏幕是否含有小数点（大屏幕）（手动添加小数点才会变成true）
 let isHaveNegative = false; // 大屏幕是否含有负号（大屏幕）
-let isClearEqual = true; // =是否被清除（小屏幕）
+let isClearEqual = true; // =是否被清除（小屏幕）(判断如果上一步操作是=或者使用=后未手动清除=即只使用单点运算或者=的情况)
 let isHaveArithmetic = false; // 小屏幕是否含有四则运算（小屏幕）
 let isRecover = false; // 出现错误后的重置标志
 const displayData = new DisplayData();
@@ -181,7 +181,7 @@ function calculate() {
   equalPreviousData = bigScreenData;
   smallLastScreenData = bigScreenData;
   smallScreenData = `${smallScreenData + bigScreenData}=`;
-  bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData).toString();
+  bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
   previousBigScreenData = bigScreenData;
   isHaveNegative = !(Number(bigScreenData) > 0);
 }
@@ -198,13 +198,13 @@ function checkBigData() {
   }
   bigScreenData = bigScreenData.substring(0, index + 1);
 }
-// 回头再抽取一下
+
 function equalHandler() {
   checkBigData();
   if (!isClearEqual) {
     if (isHaveArithmetic) {
       smallScreenData = `${bigScreenData + lastArithmeticSymbol + equalPreviousData}=`;
-      bigScreenData = arithmetic(bigScreenData, lastArithmeticSymbol, equalPreviousData).toString();
+      bigScreenData = arithmetic(bigScreenData, lastArithmeticSymbol, equalPreviousData);
       previousBigScreenData = bigScreenData;
       isHaveNegative = !(Number(bigScreenData) > 0);
     } else {
@@ -225,12 +225,12 @@ function equalHandler() {
   } else if (previousOperationType === 'SingleOperation') {
     equalPreviousData = bigScreenData;
     smallScreenData = `${smallScreenData}=`;
-    bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData).toString();
+    bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
     previousBigScreenData = bigScreenData;
     isHaveNegative = !(Number(bigScreenData) > 0);
   }
 }
-// 回头再抽取一下
+
 function ArithmeticHandler(text) {
   checkBigData();
   if (!isClearEqual) {
@@ -241,7 +241,7 @@ function ArithmeticHandler(text) {
     if (isHaveArithmetic) {
       smallLastScreenData = bigScreenData;
       smallScreenData = smallScreenData + bigScreenData + text;
-      bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData).toString();
+      bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
       isHaveNegative = !(Number(bigScreenData) > 0);
     } else {
       smallScreenData = bigScreenData + text;
@@ -252,31 +252,56 @@ function ArithmeticHandler(text) {
   } else if (previousOperationType === 'Arithmetic') {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - 1) + text;
   } else if (previousOperationType === 'SingleOperation') {
+    smallScreenData += text;
     if (isHaveArithmetic) {
-      smallScreenData += text;
-      bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData).toString();
+      bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
       isHaveNegative = !(Number(bigScreenData) > 0);
     } else {
-      //
-      smallScreenData += text;
       isHaveArithmetic = true;
     }
     previousBigScreenData = bigScreenData;
   }
 }
-function SingleOperationOne(text) {
+function reciprocalChange(type) {
+  if (type === 'equal') {
+    smallScreenData = `1/(${bigScreenData})`;
+  } else if (type === 'single') {
+    smallLastScreenData = `1/(${smallLastScreenData})`;
+  } else if (type === 'other') {
+    smallLastScreenData = `1/(${bigScreenData})`;
+  }
+}
+function squareChange(type) {
+  if (type === 'equal') {
+    smallScreenData = `sqr(${bigScreenData})`;
+  } else if (type === 'single') {
+    smallLastScreenData = `sqr(${smallLastScreenData})`;
+  } else if (type === 'other') {
+    smallLastScreenData = `sqr(${bigScreenData})`;
+  }
+}
+function rootSquareChange(type) {
+  if (type === 'equal') {
+    smallScreenData = `rSqr(${bigScreenData})`;
+  } else if (type === 'single') {
+    smallLastScreenData = `rSqr(${smallLastScreenData})`;
+  } else if (type === 'other') {
+    smallLastScreenData = `rSqr(${bigScreenData})`;
+  }
+}
+function singleOperation(text, type) {
   let result = 0;
   switch (text) {
     case screenTexts.reciprocal:
-      smallScreenData = `1/(${bigScreenData})`;
+      reciprocalChange(type);
       bigScreenData = arithmetic('1', screenTexts.division, bigScreenData);
       break;
     case screenTexts.square:
-      smallScreenData = `sqr(${bigScreenData})`;
+      squareChange(type);
       bigScreenData = arithmetic(bigScreenData, screenTexts.multiplication, bigScreenData);
       break;
     case screenTexts.rootSquare:
-      smallScreenData = `rSqr(${bigScreenData})`;
+      rootSquareChange(type);
       if (bigScreenData[0] === '-') {
         throw new Error('Invalid input');
       }
@@ -287,65 +312,26 @@ function SingleOperationOne(text) {
       break;
   }
 }
-function SingleOperationTwo(text) {
-  let result = 0;
-  switch (text) {
-    case screenTexts.reciprocal:
-      smallLastScreenData = `1/(${smallLastScreenData})`;
-      bigScreenData = arithmetic('1', screenTexts.division, bigScreenData);
-      break;
-    case screenTexts.square:
-      smallLastScreenData = `sqr(${smallLastScreenData})`;
-      bigScreenData = arithmetic(bigScreenData, screenTexts.multiplication, bigScreenData);
-      break;
-    case screenTexts.rootSquare:
-      smallLastScreenData = `rSqr(${smallLastScreenData})`;
-      if (bigScreenData[0] === '-') {
-        throw new Error('Invalid input');
-      }
-      result = Number(bigScreenData) ** 0.5;
-      bigScreenData = Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(checkNumber(result.toString()), 10));
-      break;
-    default:
-      break;
-  }
-}
-function SingleOperationThree(text) {
-  let result = 0;
-  switch (text) {
-    case screenTexts.reciprocal:
-      smallLastScreenData = `1/(${bigScreenData})`;
-      bigScreenData = arithmetic('1', screenTexts.division, bigScreenData);
-      break;
-    case screenTexts.square:
-      smallLastScreenData = `sqr(${bigScreenData})`;
-      bigScreenData = arithmetic(bigScreenData, screenTexts.multiplication, bigScreenData);
-      break;
-    case screenTexts.rootSquare:
-      smallLastScreenData = `rSqr(${bigScreenData})`;
-      if (bigScreenData[0] === '-') {
-        throw new Error('Invalid input');
-      }
-      result = Number(bigScreenData) ** 0.5;
-      bigScreenData = Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(checkNumber(result.toString()), 10));
-      break;
-    default:
-      break;
-  }
-}
-function SingleOperationHandler(text) {
+function singleOperationHandler(text) {
   if (previousOperationType === 'Equal') {
-    SingleOperationOne(text);
+    singleOperation(text, 'equal');
     smallLastScreenData = smallScreenData;
   } else if (previousOperationType === 'SingleOperation') {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
-    SingleOperationTwo(text);
+    singleOperation(text, 'single');
     smallScreenData += smallLastScreenData;
   } else {
-    SingleOperationThree(text);
+    singleOperation(text, 'other');
     smallScreenData += smallLastScreenData;
   }
   isHaveNegative = !(Number(bigScreenData) > 0);
+}
+function percentSign() {
+  if (lastArithmeticSymbol === '+' || lastArithmeticSymbol === '-') {
+    bigScreenData = (Number(previousBigScreenData) * Number(bigScreenData) * 0.01).toString();
+  } else {
+    bigScreenData = (Number(bigScreenData) * 0.01).toString();
+  }
 }
 function percentSignHandler() {
   if (!isHaveArithmetic) {
@@ -353,29 +339,17 @@ function percentSignHandler() {
     smallScreenData = '0';
     smallLastScreenData = '0';
   } else if (!isClearEqual) {
-    if (lastArithmeticSymbol === '+' || lastArithmeticSymbol === '-') {
-      bigScreenData = (Number(previousBigScreenData) * Number(bigScreenData) * 0.01).toString();
-    } else {
-      bigScreenData = (Number(bigScreenData) * 0.01).toString();
-    }
+    percentSign();
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = bigScreenData;
     smallScreenData = bigScreenData;
   } else if (previousOperationType === 'SingleOperation') {
-    if (lastArithmeticSymbol === '+' || lastArithmeticSymbol === '-') {
-      bigScreenData = (Number(previousBigScreenData) * Number(bigScreenData) * 0.01).toString();
-    } else {
-      bigScreenData = (Number(bigScreenData) * 0.01).toString();
-    }
+    percentSign();
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = bigScreenData;
     smallScreenData += bigScreenData;
   } else {
-    if (lastArithmeticSymbol === '+' || lastArithmeticSymbol === '-') {
-      bigScreenData = (Number(previousBigScreenData) * Number(bigScreenData) * 0.01).toString();
-    } else {
-      bigScreenData = (Number(bigScreenData) * 0.01).toString();
-    }
+    percentSign();
     smallLastScreenData = bigScreenData;
     smallScreenData += bigScreenData;
   }
@@ -445,7 +419,7 @@ export function dealOperation(text) {
     previousOperationType = 'SingleOperation';
   } else if (text === screenTexts.rootSquare || text === screenTexts.square || text === screenTexts.reciprocal) {
     try {
-      SingleOperationHandler(text);
+      singleOperationHandler(text);
     } catch (e) {
       if (e.message === 'Invalid input') {
         invalidHandler();
