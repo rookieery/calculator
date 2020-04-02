@@ -7,18 +7,23 @@ import { removeButtonsEvent, recoverButtonsEvent } from '../buttons/dealButton.j
 
 let bigScreenData = '0';
 let smallScreenData = '';
-let lastArithmeticSymbol = ''; // 最后一个四则运算的符号（小屏幕）（最后一个四则运算符的后一位数据）
-let previousOperationType = ''; // 上一次操作类型
-let previousBigScreenData = '0';// 上一次大屏幕更新数据（大屏幕）(记录最后一个四则运算前的表达式的结果值)
-let smallLastScreenData = ''; // 小屏幕最后一个数据（小屏幕）（主要使用于单点运算的复合更新）
-let equalPreviousData = ''; // =前的操作数（小屏幕）(四则运算激活时才会改变)(连等的时候使用)
-let isHaveDecimalPoint = false; // 大屏幕是否含有小数点（大屏幕）（手动添加小数点才会变成true）
-let isHaveNegative = false; // 大屏幕是否含有负号（大屏幕）
-let isClearEqual = true; // =是否被清除（小屏幕）(判断如果上一步操作是=或者使用=后未手动清除=即只使用单点运算或者=的情况)
-let isHaveArithmetic = false; // 小屏幕是否含有四则运算（小屏幕）
-let isRecover = false; // 出现错误后的重置标志
+let lastArithmeticSymbol = '';
+let previousOperationType = '';
+let previousBigScreenData = '0';// Record the result of the expression before the last four operations
+let smallLastScreenData = '';
+let equalPreviousData = '';
+let isHaveDecimalPoint = false;
+let isHaveNegative = false;
+let isClearEqual = true;
+let isHaveArithmetic = false;
+let isRecover = false;
 const displayData = new DisplayData();
-
+const previousOperationTypes = {
+  singleOperation: 'SingleOperation',
+  number: 'Number',
+  equal: 'Equal',
+  arithmetic: 'Arithmetic',
+};
 export const getBigScreenStr = () => bigScreenData;
 export const getSmallScreenStr = () => smallScreenData;
 
@@ -26,7 +31,7 @@ function resetAll() {
   bigScreenData = '0';
   smallScreenData = '';
   lastArithmeticSymbol = '';
-  previousOperationType = 'Number';
+  previousOperationType = previousOperationTypes.number;
   previousBigScreenData = '0';
   smallLastScreenData = '';
   equalPreviousData = '';
@@ -44,7 +49,7 @@ function ceHandler() {
   bigScreenData = '0';
   if (!isClearEqual) {
     resetAll();
-  } else if (isHaveArithmetic && previousOperationType === 'SingleOperation') {
+  } else if (isHaveArithmetic && previousOperationType === previousOperationTypes.singleOperation) {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = '';
     isHaveDecimalPoint = false;
@@ -54,7 +59,7 @@ function ceHandler() {
 function delHandler() {
   if (!isClearEqual) {
     smallScreenData = '';
-  } else if (previousOperationType === 'Number') {
+  } else if (previousOperationType === previousOperationTypes.number) {
     const dataLength = isHaveNegative ? bigScreenData.length - 1 : bigScreenData.length;
     if (dataLength === 1) {
       bigScreenData = '0';
@@ -68,29 +73,28 @@ function delHandler() {
   }
 }
 function numberSignHandler() {
-  // 改变小屏幕数据
-  if (previousOperationType === 'Number') {
+  // Change small screen data
+  if (previousOperationType === previousOperationTypes.number) {
     if (bigScreenData === '0') {
       return;
     }
-    previousOperationType = 'Number';
-  } else if (previousOperationType === 'Equal') {
+    previousOperationType = previousOperationTypes.number;
+  } else if (previousOperationType === previousOperationTypes.equal) {
     delHandler();
     smallLastScreenData = `negate(${bigScreenData})`;
     smallScreenData += smallLastScreenData;
-    previousOperationType = 'SingleOperation';
-  } else if (previousOperationType === 'Arithmetic') {
+    previousOperationType = previousOperationTypes.singleOperation;
+  } else if (previousOperationType === previousOperationTypes.arithmetic) {
     smallLastScreenData = `negate(${bigScreenData})`;
     smallScreenData += smallLastScreenData;
-    previousOperationType = 'SingleOperation';
+    previousOperationType = previousOperationTypes.singleOperation;
   } else {
-    // 默认是替换所有，但是由于下一步直接替换掉了，所有野就是最后一个
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = `negate(${smallLastScreenData})`;
     smallScreenData += smallLastScreenData;
-    previousOperationType = 'SingleOperation';
+    previousOperationType = previousOperationTypes.singleOperation;
   }
-  // 改变大屏幕数据
+  // Change big screen data
   if (isHaveNegative) {
     isHaveNegative = false;
     bigScreenData = bigScreenData.substring(1);
@@ -100,7 +104,7 @@ function numberSignHandler() {
   }
 }
 function decimalPointHandler() {
-  if (previousOperationType === 'Number') {
+  if (previousOperationType === previousOperationTypes.number) {
     if (isHaveDecimalPoint) {
       return;
     }
@@ -108,33 +112,28 @@ function decimalPointHandler() {
     isHaveDecimalPoint = true;
     return;
   }
-  if (!isClearEqual || (isHaveArithmetic && previousOperationType === 'SingleOperation')) {
-    // 相当于CE.
+  if (!isClearEqual || (isHaveArithmetic && previousOperationType === previousOperationTypes.singleOperation)) {
     ceHandler();
   }
   bigScreenData = '0.';
   isHaveDecimalPoint = true;
 }
 function numberHandler(text) {
-  if (previousOperationType === 'Number') {
+  if (previousOperationType === previousOperationTypes.number) {
     bigScreenData = bigScreenData === '0' ? text : bigScreenData + text;
   } else if (!isClearEqual) {
     delHandler();
     bigScreenData = text;
     previousBigScreenData = bigScreenData;
-  } else if (isHaveArithmetic && previousOperationType === 'SingleOperation') {
+  } else if (isHaveArithmetic && previousOperationType === previousOperationTypes.singleOperation) {
     ceHandler();
     bigScreenData = text;
   } else {
     bigScreenData = text;
   }
 }
-function checkNumber(number) {
-  let count = 0;
-  while (number[number.length - count - 1] !== '.') {
-    count++;
-  }
-  return count;
+function getPointLength(number) {
+  return number.length - number.indexOf('.') - 1;
 }
 function checkResultNumber(result) {
   if (!result.includes('.')) {
@@ -151,10 +150,10 @@ function arithmetic(numOne, sign, numTwo) {
   let countNumTwo = 0;
   let result = 0;
   if (numOne.includes('.')) {
-    countNumOne = checkNumber(numOne);
+    countNumOne = getPointLength(numOne);
   }
   if (numTwo.includes('.')) {
-    countNumTwo = checkNumber(numTwo);
+    countNumTwo = getPointLength(numTwo);
   }
   const index = Math.max(countNumOne, countNumTwo);
   switch (sign) {
@@ -172,7 +171,7 @@ function arithmetic(numOne, sign, numTwo) {
         throw new Error('Cannot divide by zero');
       }
       result = Number(numOne) / Number(numTwo);
-      return Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(checkNumber(result.toString()), 10));
+      return Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(getPointLength(result.toString()), 10));
     default:
       return null;
   }
@@ -183,7 +182,7 @@ function calculate() {
   smallScreenData = `${smallScreenData + bigScreenData}=`;
   bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
   previousBigScreenData = bigScreenData;
-  isHaveNegative = !(Number(bigScreenData) > 0);
+  isHaveNegative = Number(bigScreenData) < 0;
 }
 function checkBigData() {
   if (!bigScreenData.includes('.')) {
@@ -206,13 +205,13 @@ function equalHandler() {
       smallScreenData = `${bigScreenData + lastArithmeticSymbol + equalPreviousData}=`;
       bigScreenData = arithmetic(bigScreenData, lastArithmeticSymbol, equalPreviousData);
       previousBigScreenData = bigScreenData;
-      isHaveNegative = !(Number(bigScreenData) > 0);
+      isHaveNegative = Number(bigScreenData) < 0;
     } else {
       smallScreenData = `${bigScreenData}=`;
       previousBigScreenData = bigScreenData;
       smallLastScreenData = bigScreenData;
     }
-  } else if (previousOperationType === 'Number') {
+  } else if (previousOperationType === previousOperationTypes.number) {
     if (isHaveArithmetic) {
       calculate();
     } else {
@@ -220,14 +219,14 @@ function equalHandler() {
       previousBigScreenData = bigScreenData;
       smallLastScreenData = bigScreenData;
     }
-  } else if (previousOperationType === 'Arithmetic') {
+  } else if (previousOperationType === previousOperationTypes.arithmetic) {
     calculate();
-  } else if (previousOperationType === 'SingleOperation') {
+  } else if (previousOperationType === previousOperationTypes.singleOperation) {
     equalPreviousData = bigScreenData;
     smallScreenData = `${smallScreenData}=`;
     bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
     previousBigScreenData = bigScreenData;
-    isHaveNegative = !(Number(bigScreenData) > 0);
+    isHaveNegative = Number(bigScreenData) < 0;
   }
 }
 
@@ -237,25 +236,25 @@ function ArithmeticHandler(text) {
     delHandler();
     smallScreenData = bigScreenData + text;
     isHaveArithmetic = true;
-  } else if (previousOperationType === 'Number') {
+  } else if (previousOperationType === previousOperationTypes.number) {
     if (isHaveArithmetic) {
       smallLastScreenData = bigScreenData;
       smallScreenData = smallScreenData + bigScreenData + text;
       bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
-      isHaveNegative = !(Number(bigScreenData) > 0);
+      isHaveNegative = Number(bigScreenData) < 0;
     } else {
       smallScreenData = bigScreenData + text;
       smallLastScreenData = bigScreenData;
       isHaveArithmetic = true;
     }
     previousBigScreenData = bigScreenData;
-  } else if (previousOperationType === 'Arithmetic') {
+  } else if (previousOperationType === previousOperationTypes.arithmetic) {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - 1) + text;
-  } else if (previousOperationType === 'SingleOperation') {
+  } else if (previousOperationType === previousOperationTypes.singleOperation) {
     smallScreenData += text;
     if (isHaveArithmetic) {
       bigScreenData = arithmetic(previousBigScreenData, lastArithmeticSymbol, bigScreenData);
-      isHaveNegative = !(Number(bigScreenData) > 0);
+      isHaveNegative = Number(bigScreenData) < 0;
     } else {
       isHaveArithmetic = true;
     }
@@ -306,17 +305,17 @@ function singleOperation(text, type) {
         throw new Error('Invalid input');
       }
       result = Number(bigScreenData) ** 0.5;
-      bigScreenData = Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(checkNumber(result.toString()), 10));
+      bigScreenData = Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(getPointLength(result.toString()), 10));
       break;
     default:
       break;
   }
 }
 function singleOperationHandler(text) {
-  if (previousOperationType === 'Equal') {
+  if (previousOperationType === previousOperationTypes.equal) {
     singleOperation(text, 'equal');
     smallLastScreenData = smallScreenData;
-  } else if (previousOperationType === 'SingleOperation') {
+  } else if (previousOperationType === previousOperationTypes.singleOperation) {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     singleOperation(text, 'single');
     smallScreenData += smallLastScreenData;
@@ -324,7 +323,7 @@ function singleOperationHandler(text) {
     singleOperation(text, 'other');
     smallScreenData += smallLastScreenData;
   }
-  isHaveNegative = !(Number(bigScreenData) > 0);
+  isHaveNegative = Number(bigScreenData) < 0;
 }
 function percentSign() {
   if (lastArithmeticSymbol === '+' || lastArithmeticSymbol === '-') {
@@ -343,7 +342,7 @@ function percentSignHandler() {
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = bigScreenData;
     smallScreenData = bigScreenData;
-  } else if (previousOperationType === 'SingleOperation') {
+  } else if (previousOperationType === previousOperationTypes.singleOperation) {
     percentSign();
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
     smallLastScreenData = bigScreenData;
@@ -398,9 +397,8 @@ export function dealOperation(text) {
     resetAll();
   } else if (text === screenTexts.clearCurrentOperation) {
     ceHandler();
-    previousOperationType = 'Number';
+    previousOperationType = previousOperationTypes.number;
   } else if (text === screenTexts.deleteNumber) {
-    // previousOperationType 全部不改变
     delHandler();
   } else if (text === screenTexts.addition || text === screenTexts.subtraction || text === screenTexts.multiplication || text === screenTexts.division) {
     try {
@@ -413,10 +411,10 @@ export function dealOperation(text) {
     lastArithmeticSymbol = text;
     isClearEqual = true;
     isHaveDecimalPoint = false;
-    previousOperationType = 'Arithmetic';
+    previousOperationType = previousOperationTypes.arithmetic;
   } else if (text === screenTexts.percentSign) {
     percentSignHandler();
-    previousOperationType = 'SingleOperation';
+    previousOperationType = previousOperationTypes.singleOperation;
   } else if (text === screenTexts.rootSquare || text === screenTexts.square || text === screenTexts.reciprocal) {
     try {
       singleOperationHandler(text);
@@ -429,7 +427,7 @@ export function dealOperation(text) {
       display();
       return;
     }
-    previousOperationType = 'SingleOperation';
+    previousOperationType = previousOperationTypes.singleOperation;
   }
   if (checkNumberOverFlow()) {
     overflowHandler();
@@ -442,17 +440,17 @@ export function dealNumber(text) {
     recover();
     isRecover = false;
   }
-  if (bigScreenData.length === 11 && previousOperationType === 'Number') {
+  if (bigScreenData.length === 11 && previousOperationType === previousOperationTypes.number) {
     return;
   }
   if (text === screenTexts.sign) {
     numberSignHandler();
   } else if (text === screenTexts.decimalPoint) {
     decimalPointHandler();
-    previousOperationType = 'Number';
+    previousOperationType = previousOperationTypes.number;
   } else {
     numberHandler(text);
-    previousOperationType = 'Number';
+    previousOperationType = previousOperationTypes.number;
   }
   display();
 }
@@ -472,7 +470,7 @@ export function dealEqual() {
     return;
   }
   isClearEqual = false;
-  previousOperationType = 'Equal';
+  previousOperationType = previousOperationTypes.equal;
   if (checkNumberOverFlow()) {
     overflowHandler();
   }
