@@ -16,7 +16,7 @@ let isHaveDecimalPoint = false; // 大屏幕是否含有小数点（大屏幕）
 let isHaveNegative = false; // 大屏幕是否含有负号（大屏幕）
 let isClearEqual = true; // =是否被清除（小屏幕）
 let isHaveArithmetic = false; // 小屏幕是否含有四则运算（小屏幕）
-let isRecover = false;
+let isRecover = false; // 出现错误后的重置标志
 const displayData = new DisplayData();
 
 export const getBigScreenStr = () => bigScreenData;
@@ -138,6 +138,16 @@ function checkNumber(number) {
   }
   return count;
 }
+function checkResultNumber(result) {
+  if (!result.includes('.')) {
+    return result;
+  }
+  let index = result.length - 1;
+  while (result[index] === '0') {
+    index--;
+  }
+  return result.substring(0, index + 1);
+}
 function arithmetic(numOne, sign, numTwo) {
   let countNumOne = 0;
   let countNumTwo = 0;
@@ -151,9 +161,11 @@ function arithmetic(numOne, sign, numTwo) {
   const index = Math.max(countNumOne, countNumTwo);
   switch (sign) {
     case screenTexts.addition:
-      return (Number(numOne) + Number(numTwo)).toFixed(index);
+      result = (Number(numOne) + Number(numTwo)).toFixed(index);
+      return checkResultNumber(result);
     case screenTexts.subtraction:
-      return (Number(numOne) - Number(numTwo)).toFixed(index);
+      result = (Number(numOne) - Number(numTwo)).toFixed(index);
+      return checkResultNumber(result);
     case screenTexts.multiplication:
       result = Number((Number(numOne) * Number(numTwo)).toFixed(countNumOne + countNumTwo));
       return Number.isInteger(Number(result)) ? result.toString() : result.toFixed(Math.min(countNumOne + countNumTwo, 10));
@@ -398,6 +410,10 @@ function invalidHandler() {
   bigScreenData = 'Invalid input';
   isRecover = true;
 }
+function display() {
+  displayData.showBigScreen(bigScreenData);
+  displayData.showSmallScreen(smallScreenData);
+}
 export function dealOperation(text) {
   if (isRecover) {
     recover();
@@ -416,8 +432,7 @@ export function dealOperation(text) {
       ArithmeticHandler(text);
     } catch (e) {
       divisionZeroHandler();
-      displayData.showBigScreen(bigScreenData);
-      displayData.showSmallScreen(smallScreenData);
+      display();
       return;
     }
     lastArithmeticSymbol = text;
@@ -436,8 +451,7 @@ export function dealOperation(text) {
       } else if (e.message === 'Cannot divide by zero') {
         divisionZeroHandler();
       }
-      displayData.showBigScreen(bigScreenData);
-      displayData.showSmallScreen(smallScreenData);
+      display();
       return;
     }
     previousOperationType = 'SingleOperation';
@@ -445,8 +459,7 @@ export function dealOperation(text) {
   if (checkNumberOverFlow()) {
     overflowHandler();
   }
-  displayData.showBigScreen(bigScreenData);
-  displayData.showSmallScreen(smallScreenData);
+  display();
 }
 
 export function dealNumber(text) {
@@ -466,24 +479,21 @@ export function dealNumber(text) {
     numberHandler(text);
     previousOperationType = 'Number';
   }
-  displayData.showBigScreen(bigScreenData);
-  displayData.showSmallScreen(smallScreenData);
+  display();
 }
 
 export function dealEqual() {
   if (isRecover) {
     recover();
     isRecover = false;
-    displayData.showBigScreen(bigScreenData);
-    displayData.showSmallScreen(smallScreenData);
+    display();
     return;
   }
   try {
     equalHandler();
   } catch (e) {
     divisionZeroHandler();
-    displayData.showBigScreen(bigScreenData);
-    displayData.showSmallScreen(smallScreenData);
+    display();
     return;
   }
   isClearEqual = false;
@@ -491,6 +501,5 @@ export function dealEqual() {
   if (checkNumberOverFlow()) {
     overflowHandler();
   }
-  displayData.showBigScreen(bigScreenData);
-  displayData.showSmallScreen(smallScreenData);
+  display();
 }
