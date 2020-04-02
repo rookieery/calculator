@@ -7,10 +7,10 @@ import { removeButtonsEvent, recoverButtonsEvent } from '../buttons/dealButton.j
 
 let bigScreenData = '0';
 let smallScreenData = '';
-let lastArithmeticSymbol = ''; // 最后一个四则运算的符号（小屏幕）
+let lastArithmeticSymbol = ''; // 最后一个四则运算的符号（小屏幕）（最后一个四则运算符的后一位数据）
 let previousOperationType = ''; // 上一次操作类型
-let previousBigScreenData = '0';// 上一次大屏幕更新数据（大屏幕）
-let smallLastScreenData = ''; // 小屏幕最后一个数据（小屏幕）
+let previousBigScreenData = '0';// 上一次大屏幕更新数据（大屏幕）(记录最后一个四则运算前的表达式的结果值)
+let smallLastScreenData = ''; // 小屏幕最后一个数据（小屏幕）（主要使用于单点运算的复合更新）
 let equalPreviousData = ''; // =前的操作数（小屏幕）(四则运算激活时才会改变)(连等的时候使用)
 let isHaveDecimalPoint = false; // 大屏幕是否含有小数点（大屏幕）（手动添加小数点才会变成true）
 let isHaveNegative = false; // 大屏幕是否含有负号（大屏幕）
@@ -45,10 +45,8 @@ function ceHandler() {
   if (!isClearEqual) {
     resetAll();
   } else if (isHaveArithmetic && previousOperationType === 'SingleOperation') {
-    // 回到前一步操作
-    // 改回上一步单点操作改动的属性 TODO
     smallScreenData = smallScreenData.substring(0, smallScreenData.length - smallLastScreenData.length);
-    smallLastScreenData = ''; // 保留
+    smallLastScreenData = '';
     isHaveDecimalPoint = false;
     isHaveNegative = false;
   }
@@ -188,6 +186,9 @@ function calculate() {
   isHaveNegative = !(Number(bigScreenData) > 0);
 }
 function checkBigData() {
+  if (!bigScreenData.includes('.')) {
+    return;
+  }
   let index = bigScreenData.length - 1;
   while (bigScreenData[index] === '0') {
     index--;
