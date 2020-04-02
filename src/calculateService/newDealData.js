@@ -79,7 +79,7 @@ function numberSignHandler() {
     smallLastScreenData = `negate(${bigScreenData})`;
     smallScreenData += smallLastScreenData;
     previousOperationType = 'SingleOperation';
-  } else if (smallScreenData[smallScreenData.length - 1] === lastArithmeticSymbol) {
+  } else if (previousOperationType === 'Arithmetic') {
     smallLastScreenData = `negate(${bigScreenData})`;
     smallScreenData += smallLastScreenData;
     previousOperationType = 'SingleOperation';
