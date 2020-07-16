@@ -173,7 +173,7 @@ function arithmetic(numOne, sign, numTwo) {
       result = Number(numOne) / Number(numTwo);
       return Number.isInteger(result) ? result.toString() : result.toFixed(Math.min(getPointLength(result.toString()), 10));
     default:
-      return null;
+      return numTwo;
   }
 }
 function calculate() {
